@@ -141,3 +141,4 @@ fabric.properties
 /gyro_data_server/client.py
 /gyro_data_server/server.py
 /gyro_data_server/6axis_dmp.py
+.idea/

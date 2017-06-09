@@ -17,6 +17,24 @@ packet_size = mpu.dmpGetFIFOPacketSize()
 
 
 class GyroHandler(asyncore.dispatcher_with_send):
+    def get_gyro_value(self, packet):
+        if packet[16] > 127:
+            packet[16] -= 256
+
+        if packet[20] > 127:
+            packet[20] -= 256
+
+        if packet[24] > 127:
+            packet[24] -= 256
+
+        data = {
+            'x': (packet[16] << 8) + packet[17],
+            'y': (packet[20] << 8) + packet[21],
+            'z': (packet[24] << 8) + packet[25]
+        }
+
+        return data
+
     def handle_read(self):
         data = self.recv(1024)
 
@@ -34,15 +52,26 @@ class GyroHandler(asyncore.dispatcher_with_send):
             # Получение и преобразование данных
             result = mpu.getFIFOBytes(packet_size)
             q = mpu.dmpGetQuaternion(result)
-            g = mpu.dmpGetGravity(q)
-            ypr = mpu.dmpGetYawPitchRoll(q, g)
+            gyro = self.get_gyro_value(result)
+            # g = mpu.dmpGetGravity(q)
+            # ypr = mpu.dmpGetYawPitchRoll(q, g)
 
             # Углы в градусах
-            pitch = ypr['pitch'] * 180 / math.pi
-            roll = ypr['roll'] * 180 / math.pi
-            yaw = ypr['yaw'] * 180 / math.pi
+            # pitch = ypr['pitch'] * 180 / math.pi
+            # roll = ypr['roll'] * 180 / math.pi
+            # yaw = ypr['yaw'] * 180 / math.pi
 
-            self.send('{}:{}:{}\0'.format(pitch, roll, yaw).encode('ascii'))
+            w = q.get('w')
+            qx = q.get('x')
+            qy = q.get('y')
+            qz = q.get('z')
+
+            gx = gyro.get('x')
+            gy = gyro.get('y')
+            gz = gyro.get('z')
+
+            # self.send('{}:{}:{}\0'.format(pitch, roll, yaw).encode('ascii'))
+            self.send('{}:{}:{}:{}:{}:{}:{}\0'.format(w, qx, qy, qz, gx, gy, gz).encode('ascii'))
         else:
             self.send(b'error\0')
 
