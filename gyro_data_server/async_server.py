@@ -7,8 +7,19 @@ Copyright (c) 2017 Zaitsev Oleg
 
 import asyncore
 import socket
+import logging
 import math
 from gyro_data_server import mpu6050
+
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+formatter = logging.Formatter(u'%(asctime)s - %(levelname)s - %(message)s')
+
+fh = logging.FileHandler('mpu_server.log')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
 
 mpu = mpu6050.MPU6050()
 mpu.dmpInitialize()
@@ -26,6 +37,7 @@ class GyroHandler(asyncore.dispatcher_with_send):
 
         if packet[24] > 127:
             packet[24] -= 256
+
 
         data = {
             'x': (packet[16] << 8) + packet[17],
@@ -69,6 +81,10 @@ class GyroHandler(asyncore.dispatcher_with_send):
             gx = gyro.get('x')
             gy = gyro.get('y')
             gz = gyro.get('z')
+
+            result_log_str = u''.join([u'{:}: {:<6}'.format(i, b) for i, b in enumerate(result)])
+            logger.debug(result_log_str)
+            logger.debug(u'gx: {:<10}gy: {:<10}gz: {:<10}'.format(gx, gy, gz))
 
             # self.send('{}:{}:{}\0'.format(pitch, roll, yaw).encode('ascii'))
             self.send('{}:{}:{}:{}:{}:{}:{}\0'.format(w, qx, qy, qz, gx, gy, gz).encode('ascii'))
