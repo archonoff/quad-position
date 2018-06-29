@@ -3,7 +3,7 @@ The MIT License (MIT)
 Copyright (c) 2014 Stefan Kolla
 """
 
-import smbus
+import smbus2
 
 # ===========================================================================
 # PyComms I2C Base Class (an rewriten Adafruit_I2C pythone class clone)
