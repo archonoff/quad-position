@@ -42,30 +42,6 @@ def angular_1d_filter(measurements, dt=1):
 
         return X
 
-    def get_H(X: np.matrix):
-        alpha, w, e, a_x, a_y = unpack_X(X)
-
-        root = np.sqrt(a_x**2 + a_y**2)
-
-        # H = np.matrix([[0, 1, 0, 0, 0],
-        #                [np.cos(alpha) * root, 0, 0, a_x * np.sin(alpha) / root, a_y * np.sin(alpha) / root],
-        #                [-np.sin(alpha) * root, 0, 0, a_x * np.cos(alpha) / root, a_y * np.cos(alpha) / root]])
-
-        H = np.matrix([[0, 1, 0, 0, 0],
-                       [0, 0, 0, 1, 0],
-                       [0, 0, 0, 0, 1]])
-        return H
-
-    def h(X: np.matrix):
-        alpha, w, e, a_x, a_y = unpack_X(X)
-
-        root = np.sqrt(a_x**2 + a_y**2)
-
-        Z = np.matrix([[w],
-                       [np.sin(alpha) * root],
-                       [np.cos(alpha) * root]])
-        return Z
-
     state_size = 5
     measurements_size = 3
 
@@ -75,7 +51,9 @@ def angular_1d_filter(measurements, dt=1):
                    [0.01],
                    [0.01]])
     F = get_F(X)
-    H = get_H(X)
+    H = np.matrix([[0, 1, 0, 0, 0],
+                   [0, 0, 0, 1, 0],
+                   [0, 0, 0, 0, 1]])
 
     I = np.matrix(np.identity(state_size))
     P = I * 1000
@@ -101,7 +79,6 @@ def angular_1d_filter(measurements, dt=1):
         # Update
         Z = np.matrix([[*measurement]]).T
         Y = Z - H * X
-        # Y = Z - h(X)
         S = H * P * H.T + R
         K = P * H.T * np.linalg.pinv(S)
 
