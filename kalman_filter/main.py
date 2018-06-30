@@ -7,7 +7,6 @@ from kalman_filter.kalman_filters import only_omega_filter, angular_1d_filter
 
 def filter_1d_run():
     true_alphas = []
-    true_alphas2 = []
     measured_omegas = []
     measured_axs = []
     measured_ays = []
@@ -15,7 +14,6 @@ def filter_1d_run():
     copter = SimpleCopter()
     for _ in range(1000):
         true_alphas.append(copter.alpha_x)
-        true_alphas2.append(copter.alpha_from_a())
         omega, a_x, a_y = copter.sense()
         measured_omegas.append(omega)
         measured_axs.append(a_x)
@@ -31,7 +29,6 @@ def filter_1d_run():
     ax1, ax2 = axes
 
     ax1.plot(true_alphas, label='Истиный угол')
-    ax1.plot(true_alphas2, label='Истиный угол2')
     ax1.plot(measured_omegas, label='Измеренная скорость')
     ax1.plot(filtered_alphas, label='Вычисленный угол', c='r')
     ax1.set_ylabel('Угол/угловая скорость')
