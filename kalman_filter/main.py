@@ -2,7 +2,37 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 from kalman_filter.simple_copter import SimpleCopter
-from kalman_filter.kalman_filters import only_omega_filter, angular_1d_filter
+from kalman_filter.kalman_filters import only_omega_filter, angular_1d_filter, more_simplified_1d_filter
+
+
+def more_simplified_1d_filter_run():
+    true_alphas = []
+    measured_omegas = []
+    measured_axs = []
+    measured_ays = []
+
+    copter = SimpleCopter()
+    for _ in range(1000):
+        true_alphas.append(copter.alpha_x)
+        omega, a_x, a_y = copter.sense()
+        measured_omegas.append(omega)
+        measured_axs.append(a_x)
+        measured_ays.append(a_y)
+        copter.step()
+
+    filtered_alphas = more_simplified_1d_filter(measurements=zip(measured_omegas, measured_axs, measured_ays))
+
+    plt.figure(figsize=(10, 6))
+
+    plt.plot(true_alphas, label='Истиный угол')
+    plt.plot(measured_omegas, label='Измеренная скорость')
+    plt.plot(filtered_alphas, label='Вычисленный угол', c='r')
+    plt.ylabel('Угол/угловая скорость')
+
+    plt.grid()
+    plt.legend()
+
+    plt.show()
 
 
 def filter_1d_run():
@@ -115,7 +145,8 @@ def only_omega_run():
 
 def main():
     # demo_run()
-    filter_1d_run()
+    # filter_1d_run()
+    more_simplified_1d_filter_run()
 
 
 if __name__ == '__main__':

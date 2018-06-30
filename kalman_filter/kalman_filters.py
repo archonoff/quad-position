@@ -1,6 +1,56 @@
 import numpy as np
 
 
+def more_simplified_1d_filter(measurements, dt=1):
+    np.set_printoptions(precision=3, suppress=True)
+
+    def get_F(X: np.matrix):
+        F = np.matrix([[1, dt, dt**2],
+                       [0,  1,    dt],
+                       [0,  0,     1]])
+        return F
+
+    state_size = 3
+
+    X = np.matrix([[0.01],
+                   [0.01],
+                   [0.01]])
+    F = get_F(X)
+    H = np.matrix([[1, 0, 0],
+                   [0, 1, 0]])
+
+    I = np.matrix(np.identity(state_size))
+    P = I * 100000
+
+    Q = F * F.T * .0000001
+    R = np.matrix([[100,    0],
+                   [  0, 1000]])
+
+    filtered_alphas = []
+    for measurement in measurements:
+        omega, a_x, a_y = measurement
+        alpha = np.arctan(a_x / a_y)
+
+        F = get_F(X)
+
+        # Predict
+        X = F * X
+        P = F * P * F.T + Q
+
+        # Update
+        Z = np.matrix([[alpha, omega]]).T
+        Y = Z - H * X
+        S = H * P * H.T + R
+        K = P * H.T * np.linalg.pinv(S)
+
+        X = X + K * Y
+        P = (I - K * H) * P
+
+        filtered_alphas.append(X[0, 0])
+
+    return filtered_alphas
+
+
 def angular_1d_filter(measurements, dt=1):
     np.set_printoptions(precision=3, suppress=True)
 
