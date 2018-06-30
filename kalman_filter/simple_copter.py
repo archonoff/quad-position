@@ -1,4 +1,4 @@
-from math import sin, cos
+from math import sin, cos, atan2, pi
 import numpy as np
 
 
@@ -12,14 +12,12 @@ class SimpleCopter:
     alpha_func = None
     omega_func = None
 
-    measure_omega_noise = 2
+    measure_omega_noise = 0.08
     measure_a_noise = 0.1
 
     def __init__(self):
-        self.alpha_func = lambda t: 30 * sin(t)
-        self.omega_func = lambda t: 30 * cos(t)
-        # self.alpha_func = lambda t: 0
-        # self.omega_func = lambda t: 0
+        self.alpha_func = lambda t: sin(t)
+        self.omega_func = lambda t: cos(t)
 
     def step(self):
         self.t += self.dt
@@ -33,3 +31,6 @@ class SimpleCopter:
         noise_ax = np.random.normal(0, self.measure_a_noise)
         noise_ay = np.random.normal(0, self.measure_a_noise)
         return self.omega_z + noise_omega_z, self.a_x + noise_ax, self.a_y + noise_ay
+
+    def alpha_from_a(self):
+        return atan2(self.a_x, self.a_y)
